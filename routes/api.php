@@ -2,6 +2,8 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\InvoiceController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,12 +18,20 @@ use Illuminate\Support\Facades\Route;
 
 Route::group([
     'middleware' => 'api',
-    'namespace' => '\App\Http\Controllers',
     'prefix' => 'auth'
 ], function($router){
-    Route::post('login', 'AuthController@login');
-    Route::post('register', 'AuthController@register');
-    Route::post('logout', 'AuthController@logout');
-    Route::get('profile', 'AuthController@profile');
-    Route::post('refresh', 'AuthController@refresh');
+    Route::post('/login', [AuthController::class, 'login']);
+    Route::post('/register', [AuthController::class, 'register']);
+    Route::post('/logout', [AuthController::class, 'logout']);
+    Route::post('/refresh', [AuthController::class, 'refresh']);
+    Route::get('/profile', [AuthController::class, 'profile']);
+});
+
+Route::group([
+    'middleware' => 'api',
+], function($router){
+    /*Route::get('/invoices', [InvoiceController::class, 'index']);
+    Route::post('/invoices/store', [InvoiceController::class, 'store']);
+    Route::get('/invoices/{id}', [InvoiceController::class, 'show']);*/
+    Route::resource('invoices','InvoiceController');
 });

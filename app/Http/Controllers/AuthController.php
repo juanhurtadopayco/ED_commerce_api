@@ -29,7 +29,7 @@ class AuthController extends Controller
             ], 400);
         }
 
-        $tokenValidity = 24 * 60;
+        $tokenValidity =  60;//Min
 
         $this->guard()->factory()->setTTL($tokenValidity);
 
@@ -97,7 +97,7 @@ class AuthController extends Controller
 
     public function refresh()
     {
-        $this->respondWithToken($this->guard()->refresh());
+        return $this->respondWithToken($this->guard()->refresh());
     }
 
     protected function respondWithToken($token)

@@ -26,6 +26,7 @@ class InvoiceController extends Controller
     public function index()
     {
         $invoices = $this->user->invoices()->get([
+            'id',
             'name', 
             'description', 
             'discount',
@@ -40,16 +41,6 @@ class InvoiceController extends Controller
             'message' => 'Get invoices successfully',
             'data' => $invoices
         ], 200);
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
     }
 
     /**
@@ -107,18 +98,11 @@ class InvoiceController extends Controller
      */
     public function show(Invoice $invoice)
     {
-        return $invoice;
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Invoice  $invoice
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Invoice $invoice)
-    {
-        //
+        return response()->json([
+            'success' => true,
+            'message' => 'Invoice show successfully',
+            'data' => $invoice
+        ], 200);
     }
 
     /**
