@@ -11,12 +11,9 @@ class Invoice extends Model
         'description', 
         'discount',
         'subtotal', 
-        'total', 
+        'total',
         'created_by',
         'client_id'
     ];
 
-    public function client(){
-        
-    }
 }

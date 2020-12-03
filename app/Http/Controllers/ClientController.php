@@ -4,9 +4,19 @@ namespace App\Http\Controllers;
 
 use App\Client;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 class ClientController extends Controller
 {
+    protected $user;
+
+    public function __construct()
+    {
+        $this->middleware('auth:api');
+        $this->user = $this->guard()->user();
+    }
+
     /**
      * Display a listing of the resource.
      *
@@ -14,17 +24,18 @@ class ClientController extends Controller
      */
     public function index()
     {
-        //
-    }
+        $clients = $this->user->clients()->get([
+            'id',
+            'name', 
+            'email', 
+            'document'
+        ]);
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+        return response()->json([
+            'success' => true,
+            'message' => 'Get clients successfully',
+            'data' => $clients
+        ], 200);
     }
 
     /**
@@ -50,17 +61,6 @@ class ClientController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  \App\Client  $client
-     * @return \Illuminate\Http\Response
-     */
-    public function edit(Client $client)
-    {
-        //
-    }
-
-    /**
      * Update the specified resource in storage.
      *
      * @param  \Illuminate\Http\Request  $request
@@ -81,5 +81,9 @@ class ClientController extends Controller
     public function destroy(Client $client)
     {
         //
+    }
+
+    protected function guard(){
+        return Auth::guard();
     }
 }

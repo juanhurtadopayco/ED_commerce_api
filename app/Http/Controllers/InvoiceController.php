@@ -68,7 +68,6 @@ class InvoiceController extends Controller
         }
 
         $invoice = new Invoice;
-
         $invoice->name = $request->name;
         $invoice->description = $request->description;
         $invoice->discount = $request->discount;
@@ -92,17 +91,26 @@ class InvoiceController extends Controller
 
     /**
      * Display the specified resource.
-     *
-     * @param  \App\Invoice  $invoice
+     *s
      * @return \Illuminate\Http\Response
      */
-    public function show(Invoice $invoice)
+    public function show($invoice)
     {
-        return response()->json([
-            'success' => true,
-            'message' => 'Invoice show successfully',
-            'data' => $invoice
-        ], 200);
+        try {
+            $invoice = Invoice::findOrFail($invoice);
+            return response()->json([
+                'success' => true,
+                'message' => 'Invoice show successfully',
+                'data' => $invoice
+            ], 200);    
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Oops, the invoice could not be find',
+                'errors' =>  $th->getMessage()
+            ], 400);
+        }
+         
     }
 
     /**

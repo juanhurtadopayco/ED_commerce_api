@@ -29,9 +29,9 @@ Route::group([
 
 Route::group([
     'middleware' => 'api',
-], function($router){
-    /*Route::get('/invoices', [InvoiceController::class, 'index']);
-    Route::post('/invoices/store', [InvoiceController::class, 'store']);
-    Route::get('/invoices/{id}', [InvoiceController::class, 'show']);*/
-    Route::resource('invoices','InvoiceController');
+], function(){
+
+    Route::resource('invoices','InvoiceController', ['except' => ['create', 'edit']]);
+    Route::resource('clients','ClientController', ['except' => ['create', 'edit']]);
+
 });

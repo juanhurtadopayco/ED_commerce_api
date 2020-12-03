@@ -18,6 +18,8 @@ class CreateClientsTable extends Migration
             $table->string('name');
             $table->string('email');
             $table->string('document');
+            $table->unsignedBigInteger('created_by');            
+            $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
     }
