@@ -21,7 +21,8 @@ class CreateInvoicesTable extends Migration
             $table->double('subtotal');
             $table->double('total');
             $table->boolean('paid')->default(false);
-            $table->unsignedBigInteger('created_by');            
+            $table->unsignedBigInteger('created_by');   
+            $table->string('key');
             $table->foreign('created_by')->references('id')->on('users')->onDelete('cascade');
             $table->integer('client_id')->nullable()->unsigned();
             $table->timestamps();

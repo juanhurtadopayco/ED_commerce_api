@@ -12,6 +12,7 @@ class Invoice extends Model
         'discount',
         'subtotal', 
         'total',
+        'key',
         'created_by',
         'client_id'
     ];

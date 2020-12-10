@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Client;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -46,7 +47,46 @@ class ClientController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        try {
+            $validator = Validator::make($request->all(),[
+                'name' => 'required|string', 
+                'email' => 'required|email',
+                'document' => 'required|string'
+            ]);
+    
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Wrong request',
+                    $validator->errors()
+                ], 400);
+            }
+    
+            $client = new Client;
+            $client->name = $request->name;
+            $client->email = $request->email;
+            $client->document = $request->document;
+    
+            if($this->user->clients()->save($client)){
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Client created successfully',
+                    'data' => $client
+                ], 201);
+            }else{
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Oops, the client could not be saved',
+                ], 400);
+            }
+        } catch (Exception $ex) {
+            return response()->json([
+                'success' => false,
+                'message' =>'Oops, the client could not be saved',
+                'data' => $ex->getMessage()
+            ], 500);
+        }
+        
     }
 
     /**
@@ -55,9 +95,22 @@ class ClientController extends Controller
      * @param  \App\Client  $client
      * @return \Illuminate\Http\Response
      */
-    public function show(Client $client)
+    public function show($client)
     {
-        //
+        try {
+            $client = Client::findOrFail($client);
+            return response()->json([
+                'success' => true,
+                'message' => 'Client show successfully',
+                'data' => $client
+            ], 200);    
+        } catch (Exception $ex) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Oops, the client could not be find',
+                'errors' =>  $ex->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -69,7 +122,45 @@ class ClientController extends Controller
      */
     public function update(Request $request, Client $client)
     {
-        //
+        try {
+            $validator = Validator::make($request->all(),[
+                'name' => 'required|string', 
+                'email' => 'required|email',
+                'document' => 'required|string'
+            ]);
+    
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Wrong request',
+                    $validator->errors()
+                ], 400);
+            }
+    
+            
+            $client->name = $request->name;
+            $client->email = $request->email;
+            $client->document = $request->document;
+
+            if($this->user->clients()->save($client)){
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Client updated successfully',
+                    'data' => $client
+                ], 201);
+            }else{
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Oops, the client could not be updated',
+                ], 400);
+            }  
+        } catch (Exception $ex) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Oops, the client could not be updated',
+                'errors' =>  $ex->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -80,7 +171,26 @@ class ClientController extends Controller
      */
     public function destroy(Client $client)
     {
-        //
+        try {
+            if ($client->delete()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Client deleted successfully',
+                    'data' => $client
+                ], 201);
+            }else{
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Oops, the client could not be deleted',
+                ], 400);
+            }
+        } catch (Exception $ex) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Oops, the client could not be deleted',
+                'errors' =>  $ex->getMessage()
+            ], 500);
+        }
     }
 
     protected function guard(){

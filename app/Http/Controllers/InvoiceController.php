@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers;
 
+use Illuminate\Support\Facades\Mail;
+use App\Client;
 use App\Invoice;
+use App\Mail\InvoiceCreated;
+use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
@@ -51,42 +55,79 @@ class InvoiceController extends Controller
      */
     public function store(Request $request)
     {
-        $validator = Validator::make($request->all(),[
-            'name' => 'required|string', 
-            'description' => 'required|string', 
-            'discount' => 'required|numeric',
-            'subtotal' =>  'required|numeric', 
-            'total' =>  'required|numeric', 
-        ]);
+        try {
+            $validator = Validator::make($request->all(),[
+                'name' => 'required|string', 
+                'description' => 'required|string', 
+                'discount' => 'required|numeric',
+                'subtotal' =>  'required|numeric', 
+                'total' =>  'required|numeric', 
+                'client_id' =>  'required|numeric', 
+            ]);
+    
+            if ($validator->fails()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Wrong request',
+                    $validator->errors()
+                ], 400);
+            }
+            $client = Client::find($request->client_id);
+            if ($client) {
+                
+                $keyToOpen = time();
 
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'message' => 'Wrong request',
-                $validator->errors()
-            ], 400);
-        }
+                $invoice = new Invoice;
+                $invoice->name = $request->name;
+                $invoice->description = $request->description;
+                $invoice->discount = $request->discount;
+                $invoice->subtotal =  $request->subtotal;
+                $invoice->total =  $request->total;
+                $invoice->client_id =  $request->client_id;
+                $invoice->key = base64_encode($keyToOpen);    
+                
+                if($this->user->invoices()->save($invoice)){
 
-        $invoice = new Invoice;
-        $invoice->name = $request->name;
-        $invoice->description = $request->description;
-        $invoice->discount = $request->discount;
-        $invoice->subtotal =  $request->subtotal;
-        $invoice->total =  $request->total;
-        $invoice->client_id =  $request->client_id;
+                    $notification = [
+                        "client_name" => $client->name,
+                        "invoice_name" => $invoice->name,
+                        "invoice_description" => $invoice->description,
+                        "invoice_total" =>  $request->total,
+                        "invoice_key_open" => $invoice->key,
+                        "url_payment" => env("APP_URL_FRONT") . "/invoice/$invoice->key"
+                    ];
 
-        if($this->user->invoices()->save($invoice)){
-            return response()->json([
-                'success' => true,
-                'message' => 'Invoice created successfully',
-                'data' => $invoice
-            ], 201);
-        }else{
+                    Mail::to($client->email)->send(new InvoiceCreated($notification));
+
+                    //return (new InvoiceCreated($notification))->render();
+
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Invoice created successfully',
+                        'data' => $invoice
+                    ], 201);
+                }else{
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Oops, the invoice could not be saved',
+                    ], 400);
+                }
+
+            }else{
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Oops, the client associated not exists',
+                ], 400);
+            }    
+            
+        } catch (Exception $ex) {
             return response()->json([
                 'success' => false,
                 'message' => 'Oops, the invoice could not be saved',
-            ], 400);
+                'errors' =>  $ex->getMessage()
+            ], 500);
         }
+        
     }
 
     /**
@@ -103,11 +144,11 @@ class InvoiceController extends Controller
                 'message' => 'Invoice show successfully',
                 'data' => $invoice
             ], 200);    
-        } catch (\Throwable $th) {
+        } catch (Exception $ex) {
             return response()->json([
                 'success' => false,
                 'message' => 'Oops, the invoice could not be find',
-                'errors' =>  $th->getMessage()
+                'errors' =>  $ex->getMessage()
             ], 400);
         }
          
@@ -193,6 +234,21 @@ class InvoiceController extends Controller
                 'message' => "The invoice has a payment, cannot be deleted" ,
             ], 400);
         }  
+    }
+
+    public function processPayment(Request $request)
+    {
+        try {
+            
+            //Consultar detalle de transaccion para aplicar el pago
+
+        }catch (Exception $ex) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Oops, the invoice could not be saved',
+                'errors' =>  $ex->getMessage()
+            ], 500);
+        }
     }
 
     protected function guard(){

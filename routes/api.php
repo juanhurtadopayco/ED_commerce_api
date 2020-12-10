@@ -35,3 +35,12 @@ Route::group([
     Route::resource('clients','ClientController', ['except' => ['create', 'edit']]);
 
 });
+
+Route::group([
+    'middleware' => 'api',
+    'payment'
+], function(){
+
+    Route::post('/on/response', [InvoiceController::class, 'processPayment']);
+
+});
